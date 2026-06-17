@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Notas - FAMETRO</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef2f7; padding: 20px; display: flex; justify-content: center; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 15px rgba(0,0,0,0.1); max-width: 420px; width: 100%; }
+        h2 { text-align: center; color: #004481; margin-bottom: 20px; }
+        fieldset { border: 1px solid #ddd; border-radius: 6px; padding: 15px; margin-bottom: 15px; }
+        legend { font-weight: bold; color: #333; padding: 0 5px; }
+        label { display: block; margin-top: 8px; color: #555; font-size: 14px; }
+        input { width: 100%; padding: 10px; margin-top: 4px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
+        button { width: 100%; padding: 12px; background-color: #004481; color: white; border: none; border-radius: 6px; margin-top: 20px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        button:hover { background-color: #002d54; }
+        .resultado { margin-top: 20px; padding: 15px; border-radius: 6px; text-align: center; font-size: 16px; font-weight: bold; display: none; line-height: 1.5; }
+        .sucesso { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alerta { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .perigo { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Simulador FAMETRO</h2>
+    
+    <!-- BLOCO N1 -->
+    <fieldset>
+        <legend>Nota N1 (Max: 10 pts)</legend>
+        <label for="n1Inst">Institucional (0 a 8 pts):</label>
+        <input type="number" id="n1Inst" step="0.1" min="0" max="8" placeholder="Ex: 6.5">
+        
+        <label for="n1Trans">Transversal (0 a 2 pts):</label>
+        <input type="number" id="n1Trans" step="0.1" min="0" max="2" placeholder="Ex: 2.0">
+    </fieldset>
+
+    <!-- BLOCO N2 -->
+    <fieldset>
+        <legend>Nota N2 (Média das Avaliações)</legend>
+        <label for="n2Parc">Avaliação Parcial (0 a 10 pts):</label>
+        <input type="number" id="n2Parc" step="0.1" min="0" max="10" placeholder="Ex: 7.0">
+        
+        <label for="n2Inst">Avaliação Institucional (0 a 10 pts):</label>
+        <input type="number" id="n2Inst" step="0.1" min="0" max="10" placeholder="Ex: 5.0">
+    </fieldset>
+
+    <button onclick="calcularSistemaFametro()">Analisar Situação</button>
+
+    <div id="resultadoBox" class="resultado"></div>
+</div>
+
+<script>
+function calcularSistemaFametro() {
+    // Captura de valores informados
+    const n1Inst = parseFloat(document.getElementById('n1Inst').value) || 0;
+    const n1Trans = parseFloat(document.getElementById('n1Trans').value) || 0;
+    const n2Parc = parseFloat(document.getElementById('n2Parc').value) || 0;
+    const n2Inst = parseFloat(document.getElementById('n2Inst').value) || 0;
+    
+    // Cálculo exato conforme regras da FAMETRO
+    const notaN1 = Math.min(10, n1Inst + n1Trans);
+    const notaN2 = (n2Parc + n2Inst) / 2;
+    const mediaSemestral = (notaN1 + notaN2) / 2;
+    
+    const box = document.getElementById('resultadoBox');
+    box.style.display = 'block';
+    box.className = 'resultado'; // Reset classes
+
+    let htmlRetorno = `Sua Média Semestral atual é: <strong>${mediaSemestral.toFixed(2)}</strong><br><br>`;
+
+    if (mediaSemestral >= 6.0) {
+        box.classList.add('sucesso');
+        htmlRetorno += "🎉 Parabéns! Você atingiu a média mínima de 6.0 e está <strong>APROVADO DIRETO</strong>!";
+    } 
+    else if (mediaSemestral < 4.0) {
+        box.classList.add('perigo');
+        htmlRetorno += "❌ Situação: <strong>REPROVADO DIRETO</strong>.<br>Média semestral inferior a 4.0 impede a realização do exame final.";
+    } 
+    else {
+        // Aluno no intervalo de Exame Final [4.0 a 5.9]
+        // Fórmula: (MediaSemestral + EF) / 2 = 5.0 -> Isolando o EF: EF = 10 - MediaSemestral
+        const notaNecessariaEF = 10 - mediaSemestral;
+        box.classList.add('alerta');
+        htmlRetorno += `⚠️ Situação: <strong>EXAME FINAL</strong>.<br>Você precisa tirar no mínimo <strong>${notaNecessariaEF.toFixed(2)}</strong> na prova de Exame Final para ser aprovado com média 5.0.`;
+    }
+
+    box.innerHTML = htmlRetorno;
+}
+</script>
+
+</body>
+</html>
